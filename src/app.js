@@ -57,11 +57,11 @@ app.use((err, req, res, next) => {
     res.status(500).send({ message: 'Something went wrong!', error: err.message });
 });
 
-// For Vercel deployment, export the app
-if (process.env.NODE_ENV === 'production') {
-    module.exports = app;
-} else {
-    // For local development
+// Always export the app for serverless environments
+module.exports = app;
+
+// For local development only
+if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`Server is running on:`);
         console.log(`  Local:   http://localhost:${PORT}`);
