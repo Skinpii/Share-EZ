@@ -6,7 +6,8 @@ console.log('NODE_ENV:', process.env.NODE_ENV);
 
 // MongoDB connection (use MongoDB Atlas for production)
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/file-share-app';
-console.log('Connecting to MongoDB with URI:', mongoUri);
+console.log('Connecting to MongoDB with URI:', mongoUri.replace(/\/\/.*@/, '//***:***@')); // Hide credentials in logs
+
 const mongoose = require('mongoose');
 const uploadController = require('./controllers/uploadController');
 
@@ -14,8 +15,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 mongoose.connect(mongoUri)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
+    .then(() => console.log('MongoDB connected successfully'))
+    .catch(err => {
+        console.error('MongoDB connection error:', err.message);
+        // Don't exit process on Vercel, just log the error
+        if (process.env.NODE_ENV !== 'production') {
+            process.exit(1);
+        }
+    });
 
 // Serve static files from both public directory
 app.use(express.static(path.join(__dirname, '../public')));
@@ -35,10 +42,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/views/index.html'));
 });
 
-// Add a root-level short download route for minimal URLs like /123
+// Add a root-level short download route for minimal URLs like /abc123
 app.get('/:shortId', (req, res, next) => {
-    // Only match 3-digit numeric IDs
-    if (/^\d{3}$/.test(req.params.shortId)) {
+    // Only match 10-character alphanumeric IDs (nanoid format)
+    if (/^[A-Za-z0-9]{10}$/.test(req.params.shortId)) {
         return uploadController.handleDownload(req, res);
     }
     next();
