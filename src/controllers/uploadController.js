@@ -35,15 +35,11 @@ class UploadController {
             // Save upload info to MongoDB
             await Upload.create(fileData);
 
-            // Generate a short download link using the shortest path
-            const downloadLink = `/${shortId}`;
-            // Use req.protocol and req.get('host') for a global link
-            const shortUrl = `${req.protocol}://${req.get('host')}${downloadLink}`;
+            // Return only the numeric code (shortId)
             return res.status(200).json({
                 message: 'File uploaded successfully.',
                 file: fileData.filename,
-                downloadLink,
-                shortUrl
+                code: shortId
             });
         } catch (error) {
             console.error('Error in handleUpload:', error.stack || error);

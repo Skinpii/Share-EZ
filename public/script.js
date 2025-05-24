@@ -21,12 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {    const uploadForm = docu
             });
             const data = await response.json();
             if (response.ok) {
-                // Extract shortId from the new root-level download link
-                const shortIdMatch = data.downloadLink.match(/^\/(\d{3})$/);
-                currentFileShortId = shortIdMatch ? shortIdMatch[1] : null;
-                // Use the shortUrl if available, otherwise fallback to downloadLink
-                const fullUrl = data.shortUrl || `${window.location.origin}${data.downloadLink}`;
-                downloadLink.value = fullUrl;
+                // Use only the numeric code returned by the server
+                const code = data.code;
+                currentFileShortId = code;
+                downloadLink.value = code;
                 linkContainer.style.display = 'block';
                 downloadLink.select();
             } else {
