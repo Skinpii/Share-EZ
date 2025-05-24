@@ -1,0 +1,31 @@
+{
+  "name": "file-share-app",
+  "version": "1.0.0",
+  "description": "A web application that allows users to upload files and generate shareable download links.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.817.0",
+    "@google-cloud/storage": "^7.16.0",
+    "dotenv": "^16.5.0",
+    "express": "^4.17.1",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.15.0",
+    "multer": "^1.4.2",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "keywords": [
+    "file",
+    "upload",
+    "share",
+    "link"
+  ],
+  "author": "Your Name",
+  "license": "ISC"
+}
