@@ -6,15 +6,21 @@ const Upload = require('../models/Upload');
 class UploadController {
     async handleUpload(req, res) {
         try {
+            console.log('Received upload request:', { file: req.file });
             const file = req.file;
+            console.log('Request file object:', file);
             if (!file) {
                 return res.status(400).json({ message: 'No file uploaded.' });
             }
 
-            // Generate a short numeric ID
-            const shortId = generateShortId();
+            // Generate a unique short numeric ID
+            let shortId;
+            do {
+                shortId = generateShortId();
+            } while (await Upload.exists({ shortId }));
+            console.log('Using shortId:', shortId);
 
-            // For memory storage (Vercel), we need to store file data differently
+            // Prepare file data for storage
             const fileData = {
                 shortId,
                 filename: file.filename || `${Date.now()}_${file.originalname}`,
@@ -24,6 +30,7 @@ class UploadController {
                 ...(file.buffer && { fileBuffer: file.buffer }),
                 mimetype: file.mimetype
             };
+            console.log('Prepared fileData:', fileData);
 
             // Save upload info to MongoDB
             await Upload.create(fileData);
@@ -39,7 +46,7 @@ class UploadController {
                 shortUrl
             });
         } catch (error) {
-            console.error('Error in handleUpload:', error);
+            console.error('Error in handleUpload:', error.stack || error);
             return res.status(500).json({ message: 'Error uploading file.', error: error.message });
         }
     }    async handleDownload(req, res) {

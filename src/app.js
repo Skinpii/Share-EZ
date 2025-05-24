@@ -2,14 +2,17 @@ const express = require('express');
 const path = require('path');
 const uploadRoutes = require('./routes/uploadRoutes');
 require('dotenv').config();
+console.log('NODE_ENV:', process.env.NODE_ENV);
+
+// MongoDB connection (use MongoDB Atlas for production)
+const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/file-share-app';
+console.log('Connecting to MongoDB with URI:', mongoUri);
 const mongoose = require('mongoose');
 const uploadController = require('./controllers/uploadController');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// MongoDB connection (use MongoDB Atlas for production)
-const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/file-share-app';
 mongoose.connect(mongoUri)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
@@ -18,6 +21,11 @@ mongoose.connect(mongoUri)
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Health check endpoint for debugging
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', env: process.env.NODE_ENV });
+});
 
 // Handle uploads route
 app.use('/upload', uploadRoutes);
