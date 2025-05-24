@@ -2,7 +2,6 @@ const path = require('path');
 const fs = require('fs');
 const { generateShortId } = require('../utils/shortIdGenerator');
 const Upload = require('../models/Upload');
-const CleanupService = require('../utils/cleanup');
 
 class UploadController {
     async handleUpload(req, res) {
@@ -85,21 +84,20 @@ class UploadController {
                 return res.status(500).json({ message: 'Error downloading file.', error: error.message });
             }
         }
-    }
-
-    async cleanupFile(req, res) {
+    }    async cleanupFile(req, res) {
         try {
             const { shortId } = req.params;
             if (!shortId) {
                 return res.status(400).json({ message: 'File ID is required.' });
             }
 
-            const result = await CleanupService.cleanupFile(shortId);
+            // Remove file from MongoDB
+            const uploadDoc = await Upload.findOneAndDelete({ shortId });
             
-            if (result.success) {
-                return res.status(200).json({ message: result.message });
+            if (uploadDoc) {
+                return res.status(200).json({ message: 'File cleaned up successfully.' });
             } else {
-                return res.status(404).json({ message: result.message });
+                return res.status(404).json({ message: 'File not found or already cleaned up.' });
             }
         } catch (error) {
             console.error('Error in cleanupFile endpoint:', error);
